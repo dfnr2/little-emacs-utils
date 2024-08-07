@@ -1,0 +1,45 @@
+#+TITLE: Org Property Link Insertion Utility
+#+AUTHOR: Your Name
+#+DATE: [2024-08-07 Wed]
+
+* Org Property Link Insertion Utility
+
+** Intention
+The Org Property Link Insertion utility allows you to quickly insert predefined links stored in Org-mode property drawers. This is particularly useful for frequently used links that you don't want to type out each time or for maintaining a centralized collection of important links within your Org files.
+
+** Operation
+1. Define links in your Org files using property drawers:
+   #+BEGIN_SRC org
+   :PROPERTIES:
+   :LINK: [[valve-st-disabled][=Valve Disabled=]]
+   :END:
+   #+END_SRC
+
+2. Use the keybinding =C-c C-x l= in any Org file to bring up a list of all defined links.
+3. Select a link from the list to insert it at the cursor position.
+
+** Installation
+*** For standard Emacs:
+1. Copy the utility code into your Emacs configuration file (usually =~/.emacs= or =~/.emacs.d/init.el=).
+2. Restart Emacs or evaluate the code (=M-x eval-buffer=).
+
+*** For Doom Emacs:
+1. Create a new file: =~/.doom.d/lisp/org-property-link-insertion.el=
+2. Copy the utility code into this new file.
+3. Add the following to your =~/.doom.d/config.el=:
+   #+BEGIN_SRC emacs-lisp
+   (load! "lisp/org-property-link-insertion")
+   (map! :map org-mode-map
+         :desc "Insert property link"
+         "C-c C-x l" #'org-insert-property-link)
+   #+END_SRC
+4. Run =doom sync= in your terminal and restart Emacs.
+
+** Usage
+After installation, you can start defining links in your Org files using the :LINK: property. Then, use =C-c C-x l= to insert these links quickly in any Org file.
+
+** Contributing
+If you have ideas for improvements to this utility, please feel free to contribute! You can submit pull requests or open issues with your suggestions.
+
+** License
+This utility is released under the MIT License. See the LICENSE file for more details.

@@ -1,0 +1,53 @@
+#+TITLE: Little Emacs Utilities
+#+AUTHOR: Your Name
+#+DATE: [2024-08-07 Wed]
+
+* Little Emacs Utilities
+
+Welcome to the Little Emacs Utilities repository! This collection contains small, useful utilities designed to enhance your Emacs experience. Each utility is focused on solving a specific problem or adding functionality to make working with Emacs more efficient and enjoyable.
+
+** Repository Structure
+
+This repository is organized into different categories of utilities, each in its own directory:
+
+- [[./org-mode][org-mode/]]: Utilities specific to Org-mode
+- (More categories can be added here as the collection grows)
+
+** Available Utilities
+
+*** Org-mode Utilities
+
+A collection of utilities designed to enhance your Org-mode experience. These tools aim to streamline common tasks and add useful functionality to Org-mode.
+
+For a detailed list of Org-mode utilities and their documentation, see the [[./org-mode/README.org][Org-mode Utilities README]].
+
+** Installation
+
+Each utility may have its own installation instructions. Please refer to the README file in each utility's directory for specific installation steps.
+
+Generally, you'll need to:
+
+1. Copy the utility code into your Emacs configuration file or a separate .el file.
+2. Ensure the code is evaluated (either by restarting Emacs or using =M-x eval-buffer=).
+3. Configure any necessary keybindings or settings as described in the utility's documentation.
+
+** Contributing
+
+Contributions to Little Emacs Utilities are welcome! If you have ideas for new utilities or improvements to existing ones, please feel free to:
+
+1. Fork the repository
+2. Create a new branch for your feature
+3. Add your utility or make your changes
+4. Submit a pull request
+
+Please ensure that any new utilities include proper documentation and follow the existing structure of the repository.
+
+** License
+
+This collection of utilities is released under the MIT License. See the LICENSE file for more details.
+
+** Contact
+
+If you have any questions, suggestions, or just want to discuss Emacs utilities, feel free to open an issue in this repository.
+
+Happy Emacs hacking!

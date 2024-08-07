@@ -2,7 +2,9 @@
 
 ;; Author: Your Name
 ;; Keywords: org-mode, links
-;; Version: 1.1
+;; Version: 1.2
+;; Package-Requires: ((emacs "24.4"))
+;; URL: https://github.com/dfnr2/little-emacs-utils
 
 ;;; Commentary:
 
@@ -10,43 +12,40 @@
 ;; property drawers.  It's particularly useful for quickly inserting
 ;; frequently used links without having to remember or type them out each time.
 
-;;; How to use (for standard Emacs):
+;;; How to use:
 
-;; 1. Copy this entire file into your Emacs configuration file
-;;    (usually ~/.emacs or ~/.emacs.d/init.el).
-
-;; 2. Restart Emacs or evaluate the code (M-x eval-buffer).
-
-;; 3. In your Org files, define links in property drawers like this:
+;; 1. In your Org files, define links in property drawers like this:
 ;;    :PROPERTIES:
 ;;    :LINK: [[valve-st-disabled][=Valve Disabled=]]
 ;;    :END:
 
-;; 4. Use the shortcut C-c C-x l in any Org file to bring up a list of
+;; 2. Use the shortcut C-c C-x l in any Org file to bring up a list of
 ;;    all defined links. Select a link to insert it at the cursor position.
 
-;; Note: You can change the key binding by modifying the (define-key ...)
-;; line at the end of this file.
+;;; Installation:
 
-;;; How to use (for Doom Emacs):
+;; 1. Clone the repository:
+;;    git clone git@github.com:dfnr2/little-emacs-utils.git
 
-;; 1. Create a new file in your Doom Emacs configuration directory:
-;;    ~/.doom.d/lisp/org-property-link-insertion.el
+;; 2. Add the following configuration to your Emacs init file
+;;    (usually ~/.emacs, ~/.emacs.d/init.el, or ~/.doom.d/config.el for Doom Emacs):
 
-;; 2. Copy the code section of this file (everything below ";;; Code:")
-;;    into the new file.
+;;    (use-package org-property-link-insertion
+;;      :after org
+;;      :load-path "path/to/little-emacs-utils/org-mode"
+;;      :bind (:map org-mode-map
+;;                  ("C-c C-x l" . org-insert-property-link)))
 
-;; 3. In your ~/.doom.d/config.el, add the following lines:
+;; 3. Replace "path/to/little-emacs-utils" with the actual path where you cloned the repository.
+;; 4. Restart Emacs or evaluate the configuration.
 
-;;    (load! "lisp/org-property-link-insertion")
-;;    (map! :map org-mode-map
-;;          :desc "Insert property link"
-;;          "C-c C-x l" #'org-insert-property-link)
+;; Note for Doom Emacs users:
+;; If you want Doom to manage this package, add the following to your packages.el file:
+;;
+;; (package! org-property-link-insertion
+;;   :recipe (:host github :repo "dfnr2/little-emacs-utils" :files ("org-mode/*.el")))
 
-;; 4. Run 'doom sync' in your terminal and restart Emacs.
-
-;; 5. Use the functionality as described in steps 3 and 4 of the
-;;    standard Emacs instructions above.
+;; You can change the key binding by modifying the :bind section in the use-package declaration.
 
 ;;; Code:
 

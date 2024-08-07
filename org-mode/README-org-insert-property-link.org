@@ -19,24 +19,40 @@ The Org Property Link Insertion utility allows you to quickly insert predefined 
 3. Select a link from the list to insert it at the cursor position.
 
 ** Installation
-*** For standard Emacs:
-1. Copy the utility code into your Emacs configuration file (usually =~/.emacs= or =~/.emacs.d/init.el=).
-2. Restart Emacs or evaluate the code (=M-x eval-buffer=).
 
-*** For Doom Emacs:
-1. Create a new file: =~/.doom.d/lisp/org-property-link-insertion.el=
-2. Copy the utility code into this new file.
-3. Add the following to your =~/.doom.d/config.el=:
-   #+BEGIN_SRC emacs-lisp
-   (load! "lisp/org-property-link-insertion")
-   (map! :map org-mode-map
-         :desc "Insert property link"
-         "C-c C-x l" #'org-insert-property-link)
+This utility can be installed using the `use-package` macro, which works for both standard Emacs and Doom Emacs.
+
+1. Clone the repository:
+   #+BEGIN_SRC sh
+   git clone git@github.com:dfnr2/little-emacs-utils.git
    #+END_SRC
-4. Run =doom sync= in your terminal and restart Emacs.
+
+2. Add the following configuration to your Emacs init file
+   (usually =~/.emacs=, =~/.emacs.d/init.el=, or =~/.doom.d/config.el= for Doom Emacs):
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package org-property-link-insertion
+     :after org
+     :load-path "path/to/little-emacs-utils/org-mode"
+     :bind (:map org-mode-map
+                 ("C-c C-x l" . org-insert-property-link)))
+   #+END_SRC
+
+3. Replace "path/to/little-emacs-utils" with the actual path where you cloned the repository.
+4. Restart Emacs or evaluate the configuration.
+
+*** Note for Doom Emacs users:
+If you want Doom to manage this package, add the following to your =packages.el= file:
+
+#+BEGIN_SRC emacs-lisp
+(package! org-property-link-insertion
+  :recipe (:host github :repo "dfnr2/little-emacs-utils" :files ("org-mode/*.el")))
+#+END_SRC
+
+You can change the key binding by modifying the =:bind= section in the use-package declaration.
 
 ** Usage
-After installation, you can start defining links in your Org files using the :LINK: property. Then, use =C-c C-x l= to insert these links quickly in any Org file.
+After installation, you can start defining links in your Org files using the :LINK: property as shown in the Operation section. Then, use =C-c C-x l= to insert these links quickly in any Org file.
 
 ** Contributing
 If you have ideas for improvements to this utility, please feel free to contribute! You can submit pull requests or open issues with your suggestions.

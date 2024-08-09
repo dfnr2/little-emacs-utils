@@ -1,75 +1,118 @@
-;;; org-property-links.el --- Insert and create links in Org properties
+;;; org-property-links.el --- Create and insert links in Org properties -*- lexical-binding: t -*-
 
-;; Author: Your Name
-;; Keywords: org-mode, links
-;; Version: 1.3
-;; Package-Requires: ((emacs "24.4"))
-;; URL: https://github.com/dfnr2/little-emacs-utils
+;; Copyright (C) 2023 David Fenyes
+
+;; Author: David Fenyes (dfnum2@gmail.com)
+;; Version: 1.9
+;; Package-Requires: ((emacs "26.1") (org "9.3"))
+;; Keywords: convenience, hypermedia
+;; URL: https://github.com/yourusername/org-property-links
 
 ;;; Commentary:
 
-;; This package provides functions to insert and create links stored in Org mode
-;; property drawers. It's particularly useful for quickly inserting frequently
-;; used links and for creating property drawers with links based on headings or
-;; other Org elements.
+;; This package provides convenient functions to insert and create links stored
+;; in Org property drawers. It's useful for defining and quickly inserting
+;; frequently used links to be displayed by name rather than section number.
 
-;;; How to use:
+;; Features:
+;; - Insert links from existing property drawers
+;; - Create new property drawers with links based on current Org elements
+;; - Customizable sorting options for link insertion
+;; - Flexible link target selection (NAME, target definition, CUSTOM_ID, or heading)
 
-;; 1. In your Org files, define links in property drawers like this:
-;;    :PROPERTIES:
-;;    :LINK: [[valve-st-disabled][=Valve Disabled=]]
-;;    :END:
+;; Usage:
+;; - M-x org-insert-property-link : Insert a link from existing properties
+;; - M-x org-create-property-link : Create a new property link for the current element
 
-;; 2. Use the shortcut C-c C-x l to insert a link from existing properties.
-;; 3. Use the shortcut C-c C-x L to create a new property drawer with a link.
+;; Configuration:
+;; You can customize the following variables:
+;; - org-insert-link-sort-mode: Determines how links are sorted when inserting
+;;   (options: "description" or "link")
+;; - org-property-links-property-name: The name of the property used to store links
+;;   (default: "LINK")
 
-;;; Installation:
+;; Example configuration:
+;; (use-package org-property-links
+;;   :after org
+;;   :config
+;;   (setq org-insert-link-sort-mode "description")
+;;   (setq org-property-links-property-name "LINK"))
 
-;; 1. Clone the repository:
-;;    git clone git@github.com:dfnr2/little-emacs-utils.git
-
-;; 2. Add the following configuration to your Emacs init file
-;;    (usually ~/.emacs, ~/.emacs.d/init.el, or ~/.doom.d/config.el for Doom Emacs):
-
-;;    (use-package org-property-links
-;;      :after org
-;;      :load-path "path/to/little-emacs-utils/org-mode"
-;;      :bind (:map org-mode-map
-;;                  ("C-c C-x l" . org-insert-property-link)
-;;                  ("C-c C-x L" . org-create-property-link)))
-
-;; 3. Replace "path/to/little-emacs-utils" with the actual path where you cloned the repository.
-;; 4. Restart Emacs or evaluate the configuration.
-
-;; Note for Doom Emacs users:
-;; If you want Doom to manage this package, add the following to your packages.el file:
-;;
-;; (package! org-property-links
-;;   :recipe (:host github :repo "dfnr2/little-emacs-utils" :files ("org-mode/*.el")))
-;;
-;; And you might want to use the following key binding in your config.el:
-;;
-;; (map! :after org
-;;       :map org-mode-map
-;;       :localleader
-;;       :desc "Insert property link" "l" #'org-insert-property-link
-;;       :desc "Create property link" "L" #'org-create-property-link)
+;; For more information, see the README file or visit the package homepage.
 
 ;;; Code:
 
+(require 'org)
+(require 'org-element)
+
+(defgroup org-property-links nil
+  "Options for org-property-links."
+  :group 'org)
+
+(defcustom org-insert-link-sort-mode "description"
+  "Determines how links are sorted when inserting.
+Possible values are \"description\" or \"link\".
+This variable can be set globally or as a file-local variable."
+  :type '(choice
+          (const :tag "Sort by description" "description")
+          (const :tag "Sort by link" "link"))
+  :group 'org-property-links)
+
+(defcustom org-property-links-property-name "LINK"
+  "The name of the property used to store links."
+  :type 'string
+  :group 'org-property-links)
+
+(make-variable-buffer-local 'org-insert-link-sort-mode)
+
+(defun org-property-links--parse-link (link-string)
+  "Parse LINK-STRING and return a cons of (path . description)."
+  (if (string-match org-link-any-re link-string)
+      (cons (match-string 2 link-string)
+            (or (match-string 3 link-string)
+                (match-string 2 link-string)))
+    (cons link-string link-string)))
+
 (defun org-insert-property-link ()
-  "Insert a link from :LINK: properties in the current buffer."
+  "Insert a link from :LINK: properties in the current buffer.
+The order of presented links is determined by
+`org-insert-link-sort-mode', which can be set globally or as a
+file-local variable. If `org-insert-link-sort-mode` is not set to
+'link', sorting defaults to 'description'."
   (interactive)
-  (let* ((links
-          (org-element-map (org-element-parse-buffer) 'node-property
-            (lambda (prop)
-              (when (equal (org-element-property :key prop) "LINK")
-                (org-element-property :value prop)))))
-         (selected-link
-          (completing-read "Select link to insert: " links nil t)))
-    (if selected-link
-        (insert selected-link)
-      (message "No link selected"))))
+  (let* ((links (org-element-map (org-element-parse-buffer) 'node-property
+                  (lambda (prop)
+                    (when (equal (org-element-property :key prop) org-property-links-property-name)
+                      (org-element-property :value prop)))))
+         (parsed-links (mapcar #'org-property-links--parse-link links)))
+    (if (null parsed-links)
+        (message "No %s properties found in the current buffer." org-property-links-property-name)
+      (let* ((sorted-links (if (equal org-insert-link-sort-mode "link")
+                               (sort parsed-links
+                                     (lambda (a b)
+                                       (string< (downcase (or (car a) ""))
+                                                (downcase (or (car b) "")))))
+                             (sort parsed-links
+                                   (lambda (a b)
+                                     (string< (downcase (or (cdr a) ""))
+                                              (downcase (or (cdr b) "")))))))
+             (max-length (apply 'max (mapcar (lambda (link)
+                                               (length (format "%s (%s)" (cdr link) (car link))))
+                                             sorted-links)))
+             (padded-links (mapcar (lambda (link)
+                                     (cons (format (concat "%-" (number-to-string max-length) "s")
+                                                   (format "%s (%s)" (cdr link) (car link)))
+                                           link))
+                                   sorted-links))
+             (selected-link (completing-read
+                             "Select link to insert: "
+                             (mapcar #'car padded-links)
+                             nil t)))
+        (when selected-link
+          (let ((original-link (cdr (assoc selected-link padded-links))))
+            (insert (format "[[%s][%s]]"
+                            (car original-link)
+                            (cdr original-link)))))))))
 
 (defun org-create-property-link ()
   "Create a LINK property for the current Org item or section.
@@ -78,7 +121,8 @@ property. The LINK property contains an Org link where the target and
 description are determined as follows:
 1. If a #+NAME: property exists, it's used as the link target.
 2. If the heading contains a <<link-name>>, that's extracted as the target.
-3. Otherwise, the full heading text is used as both target and description.
+3. If a :CUSTOM_ID: property exists, it's used as the link target.
+4. Otherwise, the full heading text is used as both target and description.
 The function works on headings, list items, and other Org elements."
   (interactive)
   (save-excursion
@@ -86,12 +130,14 @@ The function works on headings, list items, and other Org elements."
     (let* ((element (org-element-at-point))
            (heading (org-element-property :raw-value element))
            (name (org-element-property :NAME element))
+           (custom-id (org-element-property :CUSTOM_ID element))
            (link-name (or name
                           (and (string-match "<<\\([^>]+\\)>>" heading)
                                (match-string 1 heading))
+                          custom-id
                           (string-trim heading)))
            (section-name (string-trim (replace-regexp-in-string "<<.*>>" "" heading)))
-           (link-property (format ":LINK: [[%s][%s]]" link-name section-name)))
+           (link-property (format ":%s: [[%s][%s]]" org-property-links-property-name link-name section-name)))
       (forward-line 1)
       (if (looking-at-p ":PROPERTIES:")
           (progn
@@ -99,7 +145,8 @@ The function works on headings, list items, and other Org elements."
             (while (and (looking-at-p ":[A-Za-z]+:") (not (looking-at-p ":END:")))
               (forward-line 1))
             (insert link-property "\n"))
-        (insert ":PROPERTIES:\n" link-property "\n:END:\n")))))
+        (insert ":PROPERTIES:\n" link-property "\n:END:\n"))
+      (message "Link property created successfully."))))
 
 (provide 'org-property-links)
 

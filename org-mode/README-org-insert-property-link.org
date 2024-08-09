@@ -1,93 +1,116 @@
-#+TITLE: Org Property Links Utility
-#+AUTHOR: Your Name
-#+DATE: [2024-08-07 Wed]
+#+TITLE: Org Property Links
+#+AUTHOR: David Fenyes
+#+EMAIL: dfnum2@gmail.com
 
-* Org Property Links Utility
+* Overview
 
-** Intention
-The Org Property Links utility provides two main functions:
-1. Quickly insert predefined links stored in Org-mode property drawers.
-2. Create new property drawers with links based on the current Org element.
+Org Property Links is an Emacs package that provides convenient functions to
+ insert and create links stored in Org property drawers. It's useful for
+ defining and quickly inserting frequently used links to be displayed by name
+ rather than section number.
 
-These functions are particularly useful for maintaining and using a centralized
-collection of important links within your Org files.
+* Features
 
-** Operation
-*** Inserting existing links
-1. Define links in your Org files using property drawers:
-   #+BEGIN_SRC org
-   :PROPERTIES:
-   :LINK: [[valve-st-disabled][=Valve Disabled=]]
-   :END:
-   #+END_SRC
+- Insert links from existing =:LINK:= properties in the current buffer
+- Create new =:LINK:= properties based on the current Org element
+- Customizable sorting options for link insertion
+- Flexible link target selection (NAME, target definition, CUSTOM_ID, or heading)
 
-2. Use the keybinding =C-c C-x l= in any Org file to bring up a list of all
-   defined links.
-3. Select a link from the list to insert it at the cursor position.
+* Installation
 
-*** Creating new property links
-1. Position the cursor on the Org element (heading, list item, etc.) you want to
-   create a link for.
-2. Use the keybinding =C-c C-x L= to create a new property drawer with a LINK
-   property.
-3. The LINK property will be created based on the following rules:
-   - If a #+NAME: property exists, it's used as the link target.
-   - If the heading contains a <<link-name>>, that's extracted as the target.
-   - Otherwise, the full heading text is used as both target and description.
+** Manual Installation
 
-** Installation
-
-This utility can be installed using the `use-package` macro, which works for
-both standard Emacs and Doom Emacs.
-
-1. Clone the repository:
-   #+BEGIN_SRC sh
-   git clone git@github.com:dfnr2/little-emacs-utils.git
-   #+END_SRC
-
-2. Add the following configuration to your Emacs init file
-   (usually =~/.emacs=, =~/.emacs.d/init.el=, or =~/.doom.d/config.el= for Doom Emacs):
-
-   #+BEGIN_SRC emacs-lisp
-   (use-package org-property-links
-     :after org
-     :load-path "path/to/little-emacs-utils/org-mode"
-     :bind (:map org-mode-map
-                 ("C-c C-x l" . org-insert-property-link)
-                 ("C-c C-x L" . org-create-property-link)))
-   #+END_SRC
-
-3. Replace "path/to/little-emacs-utils" with the actual path where you cloned the repository.
-4. Restart Emacs or evaluate the configuration.
-
-*** Note for Doom Emacs users:
-If you want Doom to manage this package, add the following to your =packages.el= file:
+1. Download =org-property-links.el= to your local machine.
+2. Add the following to your Emacs configuration file:
 
 #+BEGIN_SRC emacs-lisp
-(package! org-property-links
-  :recipe (:host github :repo "dfnr2/little-emacs-utils" :files ("org-mode/*.el")))
+(add-to-list 'load-path "/path/to/org-property-links-directory")
+(require 'org-property-links)
 #+END_SRC
 
-And you might want to use the following key binding in your =config.el=:
+** Using use-package
 
 #+BEGIN_SRC emacs-lisp
-(map! :after org
-      :map org-mode-map
-      :localleader
-      :desc "Insert property link" "l" #'org-insert-property-link
-      :desc "Create property link" "L" #'org-create-property-link)
+(use-package org-property-links
+  :load-path "/path/to/org-property-links-directory"
+  :after org
+  :config
+  (setq org-insert-link-sort-mode "description") ; Optional: set default sort mode
+  (setq org-property-links-property-name "LINK")) ; Optional: set custom property name
 #+END_SRC
 
-This binds the functions to =SPC m l= and =SPC m L= respectively in Org mode when using Doom Emacs.
+* Usage
 
-** Usage
-After installation, you can:
-1. Start defining links in your Org files using the :LINK: property as shown in the Operation section.
-2. Use =C-c C-x l= to insert these links quickly in any Org file.
-3. Use =C-c C-x L= to create a new property drawer with a LINK property for the current Org element.
+** Inserting Links
 
-** Contributing
-If you have ideas for improvements to this utility, please feel free to contribute! You can submit pull requests or open issues with your suggestions.
+Use =M-x org-insert-property-link= to insert a link from existing =:LINK:=
+properties in the current buffer. Links will be presented according to the
+=org-insert-link-sort-mode= setting.
 
-** License
-This utility is released under the MIT License. See the LICENSE file for more details.
+** Creating Links
+
+Use =M-x org-create-property-link= to create a new =:LINK:= property for the
+current Org element. This function will create a property drawer if one doesn't
+exist and add a LINK property based on the current heading or element.
+
+* Customization
+
+You can customize the following variables:
+
+** org-insert-link-sort-mode
+
+Determines how links are sorted when inserting. Possible values are:
+
+- ="description"=: Sort links by their description (default)
+- ="link"=: Sort links by their target URL
+
+This can be set globally or as a file-local variable:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-insert-link-sort-mode "description")
+#+END_SRC
+
+Or as a file-local variable:
+
+#+BEGIN_SRC org
+,#+PROPERTY: org-insert-link-sort-mode "link"
+#+END_SRC
+
+** org-property-links-property-name
+
+The name of the property used to store links. Default is ="LINK"=. You can change it globally:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-property-links-property-name "MY_LINK")
+#+END_SRC
+
+* How It Works
+
+** Inserting Links (org-insert-property-link)
+
+1. Scans the current buffer for properties matching =org-property-links-property-name=
+2. Parses the found links
+3. Sorts the links based on =org-insert-link-sort-mode=
+4. Presents a list of links for the user to choose from
+5. Inserts the selected link at the cursor position
+
+** Creating Links (org-create-property-link)
+
+1. Examines the current Org element
+2. Determines the link target in the following order of preference:
+   a. #+NAME: property
+   b. <<target-definition>> in the heading
+   c. :CUSTOM_ID: property
+   d. Full heading text
+3. Creates a property drawer if one doesn't exist
+4. Adds a new property with the link
+
+* Contributing
+
+Contributions to Org Property Links are welcome! Please feel free to submit pull
+requests or create issues on the GitHub repository.
+
+* License
+
+This project is licensed under the GNU General Public License v3.0. See the
+LICENSE file for details.

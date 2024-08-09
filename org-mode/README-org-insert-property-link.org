@@ -1,13 +1,19 @@
-#+TITLE: Org Property Link Insertion Utility
+#+TITLE: Org Property Links Utility
 #+AUTHOR: Your Name
 #+DATE: [2024-08-07 Wed]
 
-* Org Property Link Insertion Utility
+* Org Property Links Utility
 
 ** Intention
-The Org Property Link Insertion utility allows you to quickly insert predefined links stored in Org-mode property drawers. This is particularly useful for frequently used links that you don't want to type out each time or for maintaining a centralized collection of important links within your Org files.
+The Org Property Links utility provides two main functions:
+1. Quickly insert predefined links stored in Org-mode property drawers.
+2. Create new property drawers with links based on the current Org element.
+
+These functions are particularly useful for maintaining and using a centralized
+collection of important links within your Org files.
 
 ** Operation
+*** Inserting existing links
 1. Define links in your Org files using property drawers:
    #+BEGIN_SRC org
    :PROPERTIES:
@@ -15,12 +21,24 @@ The Org Property Link Insertion utility allows you to quickly insert predefined 
    :END:
    #+END_SRC
 
-2. Use the keybinding =C-c C-x l= in any Org file to bring up a list of all defined links.
+2. Use the keybinding =C-c C-x l= in any Org file to bring up a list of all
+   defined links.
 3. Select a link from the list to insert it at the cursor position.
+
+*** Creating new property links
+1. Position the cursor on the Org element (heading, list item, etc.) you want to
+   create a link for.
+2. Use the keybinding =C-c C-x L= to create a new property drawer with a LINK
+   property.
+3. The LINK property will be created based on the following rules:
+   - If a #+NAME: property exists, it's used as the link target.
+   - If the heading contains a <<link-name>>, that's extracted as the target.
+   - Otherwise, the full heading text is used as both target and description.
 
 ** Installation
 
-This utility can be installed using the `use-package` macro, which works for both standard Emacs and Doom Emacs.
+This utility can be installed using the `use-package` macro, which works for
+both standard Emacs and Doom Emacs.
 
 1. Clone the repository:
    #+BEGIN_SRC sh
@@ -31,11 +49,12 @@ This utility can be installed using the `use-package` macro, which works for bot
    (usually =~/.emacs=, =~/.emacs.d/init.el=, or =~/.doom.d/config.el= for Doom Emacs):
 
    #+BEGIN_SRC emacs-lisp
-   (use-package org-property-link-insertion
+   (use-package org-property-links
      :after org
      :load-path "path/to/little-emacs-utils/org-mode"
      :bind (:map org-mode-map
-                 ("C-c C-x l" . org-insert-property-link)))
+                 ("C-c C-x l" . org-insert-property-link)
+                 ("C-c C-x L" . org-create-property-link)))
    #+END_SRC
 
 3. Replace "path/to/little-emacs-utils" with the actual path where you cloned the repository.
@@ -45,14 +64,27 @@ This utility can be installed using the `use-package` macro, which works for bot
 If you want Doom to manage this package, add the following to your =packages.el= file:
 
 #+BEGIN_SRC emacs-lisp
-(package! org-property-link-insertion
+(package! org-property-links
   :recipe (:host github :repo "dfnr2/little-emacs-utils" :files ("org-mode/*.el")))
 #+END_SRC
 
-You can change the key binding by modifying the =:bind= section in the use-package declaration.
+And you might want to use the following key binding in your =config.el=:
+
+#+BEGIN_SRC emacs-lisp
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert property link" "l" #'org-insert-property-link
+      :desc "Create property link" "L" #'org-create-property-link)
+#+END_SRC
+
+This binds the functions to =SPC m l= and =SPC m L= respectively in Org mode when using Doom Emacs.
 
 ** Usage
-After installation, you can start defining links in your Org files using the :LINK: property as shown in the Operation section. Then, use =C-c C-x l= to insert these links quickly in any Org file.
+After installation, you can:
+1. Start defining links in your Org files using the :LINK: property as shown in the Operation section.
+2. Use =C-c C-x l= to insert these links quickly in any Org file.
+3. Use =C-c C-x L= to create a new property drawer with a LINK property for the current Org element.
 
 ** Contributing
 If you have ideas for improvements to this utility, please feel free to contribute! You can submit pull requests or open issues with your suggestions.

@@ -13,6 +13,16 @@ A utility for quickly inserting predefined links stored in Org-mode property dra
 
 For detailed information, installation instructions, and usage guide, see [[./README-org-insert-property-link.org][README-org-insert-property-link.org]].
 
+*** org-multiline-property-utils
+This package includes a couple of small additions to org-mode for editing multi-line properties within a property drawer.
+1. A fill-column function that behaves as expected for fill-column, which, if
+   editing a property, will preserve the property name, and add continuation
+   lines if necessary. If not inside a property, wrap as usual for org-mode.
+2. A new-line function that creates a new line within a property, using a
+   continuation line.
+
+For detailed information see: [[./README-org-multiline-property-utils.org]].
+
 ** Contributing
 
 If you have ideas for new utilities or improvements to existing ones, please feel free to contribute! You can submit pull requests or open issues with your suggestions.

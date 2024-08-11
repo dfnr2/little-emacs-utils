@@ -35,29 +35,31 @@ Org Property Links is an Emacs package that provides convenient functions to
   :load-path "/path/to/org-property-links-directory"
   :after org
   :config
-  (setq org-insert-link-sort-mode "description") ; Optional: set default sort mode
-  (setq org-property-links-property-name "LINK")) ; Optional: set custom property name
+  (setq org-property-links-sort-mode "description") ; Optional: set default sort mode
+  (setq org-property-links-field "LINK")) ; Optional: set custom property name
 #+END_SRC
 
 * Usage
 
 ** Inserting Links
 
-Use =M-x org-insert-property-link= to insert a link from existing =:LINK:=
+Use =M-x org-property-links-insert= to insert a link from existing link
 properties in the current buffer. Links will be presented according to the
-=org-insert-link-sort-mode= setting.
+=org-property-links-sort-mode= setting.
 
 ** Creating Links
 
-Use =M-x org-create-property-link= to create a new =:LINK:= property for the
-current Org element. This function will create a property drawer if one doesn't
-exist and add a LINK property based on the current heading or element.
+Use =M-x org-property-links-create= to create a new LINK property for the
+current Org element. The default field value for a LINK is =:LINK:=. The field
+name can be redefined via =org-property-links-field=. This function will create
+a property drawer if one doesn't exist and add a LINK property based on the
+current heading or element.
 
 * Customization
 
 You can customize the following variables:
 
-** org-insert-link-sort-mode
+** org-property-links-sort-mode
 
 Determines how links are sorted when inserting. Possible values are:
 
@@ -76,7 +78,7 @@ Or as a file-local variable:
 ,#+PROPERTY: org-insert-link-sort-mode "link"
 #+END_SRC
 
-** org-property-links-property-name
+** org-property-links-field
 
 The name of the property used to store links. Default is ="LINK"=. You can change it globally:
 
@@ -86,15 +88,15 @@ The name of the property used to store links. Default is ="LINK"=. You can chang
 
 * How It Works
 
-** Inserting Links (org-insert-property-link)
+** Inserting Links (org-property-links-insert)
 
-1. Scans the current buffer for properties matching =org-property-links-property-name=
+1. Scans the current buffer for properties matching =org-property-links-field=
 2. Parses the found links
-3. Sorts the links based on =org-insert-link-sort-mode=
+3. Sorts the links based on =org-property-links-sort-mode=
 4. Presents a list of links for the user to choose from
 5. Inserts the selected link at the cursor position
 
-** Creating Links (org-create-property-link)
+** Creating Links (org-property-links-create)
 
 1. Examines the current Org element
 2. Determines the link target in the following order of preference:

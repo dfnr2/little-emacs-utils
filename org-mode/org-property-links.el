@@ -21,8 +21,8 @@
 ;; - Flexible link target selection (NAME, target definition, CUSTOM_ID, or heading)
 
 ;; Usage:
-;; - M-x org-insert-property-link : Insert a link from existing properties
-;; - M-x org-create-property-link : Create a new property link for the current element
+;; - M-x org-property-links-insert : Insert a link from existing properties
+;; - M-x org-property-link : Create a new property link for the current element
 
 ;; Configuration:
 ;; You can customize the following variables:
@@ -35,8 +35,8 @@
 ;; (use-package org-property-links
 ;;   :after org
 ;;   :config
-;;   (setq org-insert-link-sort-mode "description")
-;;   (setq org-property-links-property-name "LINK"))
+;;   (setq org-property-links-sort-mode "description")
+;;   (setq org-property-links-field "LINK"))
 
 ;; For more information, see the README file or visit the package homepage.
 
@@ -49,7 +49,7 @@
   "Options for org-property-links."
   :group 'org)
 
-(defcustom org-insert-link-sort-mode "description"
+(defcustom org-property-links-sort-mode "description"
   "Determines how links are sorted when inserting.
 Possible values are \"description\" or \"link\".
 This variable can be set globally or as a file-local variable."
@@ -58,7 +58,7 @@ This variable can be set globally or as a file-local variable."
           (const :tag "Sort by link" "link"))
   :group 'org-property-links)
 
-(defcustom org-property-links-property-name "LINK"
+(defcustom org-property-links-field "LINK"
   "The name of the property used to store links."
   :type 'string
   :group 'org-property-links)
@@ -73,7 +73,7 @@ This variable can be set globally or as a file-local variable."
                 (match-string 2 link-string)))
     (cons link-string link-string)))
 
-(defun org-insert-property-link ()
+(defun org-property-links-insert ()
   "Insert a link from :LINK: properties in the current buffer.
 The order of presented links is determined by
 `org-insert-link-sort-mode', which can be set globally or as a
@@ -114,7 +114,7 @@ file-local variable. If `org-insert-link-sort-mode` is not set to
                             (car original-link)
                             (cdr original-link)))))))))
 
-(defun org-create-property-link ()
+(defun org-property-links-create ()
   "Create a LINK property for the current Org item or section.
 This function inserts a property drawer (if not present) and adds a LINK
 property. The LINK property contains an Org link where the target and

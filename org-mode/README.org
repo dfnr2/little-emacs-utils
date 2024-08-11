@@ -11,7 +11,7 @@ This repository contains a collection of utilities designed to enhance your Org-
 *** org-insert-property-link
 A utility for quickly inserting predefined links stored in Org-mode property drawers. This tool allows you to maintain a centralized collection of important links within your Org files and insert them efficiently.
 
-For detailed information, installation instructions, and usage guide, see [[./README-org-insert-property-link.org][README-org-insert-property-link.org]].
+For detailed information, installation instructions, and usage guide, see [[./README-org-property-links.org]].
 
 *** org-multiline-property-utils
 This package includes a couple of small additions to org-mode for editing multi-line properties within a property drawer.

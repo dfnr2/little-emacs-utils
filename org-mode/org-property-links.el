@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 David Fenyes
 
 ;; Author: David Fenyes (dfnum2@gmail.com)
-;; Version: 1.10
+;; Version: 1.11
 ;; Package-Requires: ((emacs "26.1") (org "9.3"))
 ;; Keywords: convenience, hypermedia
 ;; URL: https://github.com/yourusername/org-property-links
@@ -26,7 +26,7 @@
 
 ;; Configuration:
 ;; You can customize the following variables:
-;; - org-insert-link-sort-mode: Determines how links are sorted when inserting
+;; - org-property-links-sort-mode: Determines how links are sorted when inserting
 ;;   (options: "description" or "link")
 ;; - org-property-links-field: The name of the property used to store links
 ;;   (default: "LINK")
@@ -63,7 +63,7 @@ This variable can be set globally or as a file-local variable."
   :type 'string
   :group 'org-property-links)
 
-(make-variable-buffer-local 'org-insert-link-sort-mode)
+(make-variable-buffer-local 'org-property-links-sort-mode)
 
 (defun org-property-links--parse-link (link-string)
   "Parse LINK-STRING and return a cons of (path . description)."
@@ -76,9 +76,9 @@ This variable can be set globally or as a file-local variable."
 (defun org-property-links-insert ()
   "Insert a link from :LINK: properties in the current buffer.
 The order of presented links is determined by
-`org-insert-link-sort-mode', which can be set globally or as a
-file-local variable. If `org-insert-link-sort-mode` is not set to
-'link', sorting defaults to 'description'."
+`org-property-links-sort-mode', which can be set globally or as a
+file-local variable. Links are sorted by link unless
+`org-property-links-sort-mode` is explicitly set to 'description'."
   (interactive)
   (let* ((links (org-element-map (org-element-parse-buffer) 'node-property
                   (lambda (prop)
@@ -87,23 +87,20 @@ file-local variable. If `org-insert-link-sort-mode` is not set to
          (parsed-links (mapcar #'org-property-links--parse-link links)))
     (if (null parsed-links)
         (message "No %s properties found in the current buffer." org-property-links-field)
-      (let* ((sorted-links (if (equal org-insert-link-sort-mode "link")
-                               (sort parsed-links
-                                     (lambda (a b)
-                                       (string< (downcase (or (car a) ""))
-                                                (downcase (or (car b) "")))))
-                             (sort parsed-links
-                                   (lambda (a b)
-                                     (string< (downcase (or (cdr a) ""))
-                                              (downcase (or (cdr b) "")))))))
-             (max-length (apply 'max (mapcar (lambda (link)
-                                               (length (format "%s (%s)" (cdr link) (car link))))
-                                             sorted-links)))
+      (let* ((sort-by-description (equal org-property-links-sort-mode "description"))
+             (sorted-links (sort parsed-links
+                                 (lambda (a b)
+                                   (string< (downcase (or (if sort-by-description (cdr a) (car a)) ""))
+                                            (downcase (or (if sort-by-description (cdr b) (car b)) ""))))))
+             (formatted-links (mapcar (lambda (link)
+                                        (if sort-by-description
+                                            (cons (format "%s (%s)" (cdr link) (car link)) link)
+                                          (cons (format "%s (%s)" (car link) (cdr link)) link)))
+                                      sorted-links))
+             (max-length (apply #'max (mapcar (lambda (link) (length (car link))) formatted-links)))
              (padded-links (mapcar (lambda (link)
-                                     (cons (format (concat "%-" (number-to-string max-length) "s")
-                                                   (format "%s (%s)" (cdr link) (car link)))
-                                           link))
-                                   sorted-links))
+                                     (cons (format (format "%%-%ds" max-length) (car link)) (cdr link)))
+                                   formatted-links))
              (selected-link (completing-read
                              "Select link to insert: "
                              (mapcar #'car padded-links)

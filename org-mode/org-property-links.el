@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 David Fenyes
 
 ;; Author: David Fenyes (dfnum2@gmail.com)
-;; Version: 1.9
+;; Version: 1.10
 ;; Package-Requires: ((emacs "26.1") (org "9.3"))
 ;; Keywords: convenience, hypermedia
 ;; URL: https://github.com/yourusername/org-property-links
@@ -28,7 +28,7 @@
 ;; You can customize the following variables:
 ;; - org-insert-link-sort-mode: Determines how links are sorted when inserting
 ;;   (options: "description" or "link")
-;; - org-property-links-property-name: The name of the property used to store links
+;; - org-property-links-field: The name of the property used to store links
 ;;   (default: "LINK")
 
 ;; Example configuration:
@@ -82,11 +82,11 @@ file-local variable. If `org-insert-link-sort-mode` is not set to
   (interactive)
   (let* ((links (org-element-map (org-element-parse-buffer) 'node-property
                   (lambda (prop)
-                    (when (equal (org-element-property :key prop) org-property-links-property-name)
+                    (when (equal (org-element-property :key prop) org-property-links-field)
                       (org-element-property :value prop)))))
          (parsed-links (mapcar #'org-property-links--parse-link links)))
     (if (null parsed-links)
-        (message "No %s properties found in the current buffer." org-property-links-property-name)
+        (message "No %s properties found in the current buffer." org-property-links-field)
       (let* ((sorted-links (if (equal org-insert-link-sort-mode "link")
                                (sort parsed-links
                                      (lambda (a b)
@@ -137,7 +137,7 @@ The function works on headings, list items, and other Org elements."
                           custom-id
                           (string-trim heading)))
            (section-name (string-trim (replace-regexp-in-string "<<.*>>" "" heading)))
-           (link-property (format ":%s: [[%s][%s]]" org-property-links-property-name link-name section-name)))
+           (link-property (format ":%s: [[%s][%s]]" org-property-links-field link-name section-name)))
       (forward-line 1)
       (if (looking-at-p ":PROPERTIES:")
           (progn

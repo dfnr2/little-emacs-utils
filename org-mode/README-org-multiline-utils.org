@@ -1,0 +1,127 @@
+#+TITLE: org-multiline-utils
+#+AUTHOR: David F. (updated by David)
+#+DESCRIPTION: Utilities for wrapping multiline property values and specific Org-mode keywords.
+
+* Overview
+
+  org-multiline-utils provides utilities for wrapping multiline property values
+  and selected Org-mode keywords, enhancing readability and editing convenience.
+
+  Supported Org-mode keywords include:
+
+  - #+AUTHOR:
+  - #+CAPTION:
+  - #+HTML_HEAD:
+  - #+LATEX_HEADER:
+  - #+TITLE:
+
+** Functions Provided
+
+1. org-property-column-fill
+
+   Wraps multiline property values and supported Org-mode keywords to the
+   current fill-column width, preserving embedded newlines.
+
+2. org-insert-property-continuation
+
+   Inserts a continuation line for the current property or supported keyword.
+
+** Installation
+
+*** For Doom Emacs Users
+
+1. Save =org-multiline-utils.el= in your Doom Emacs lisp directory:
+   Typically =~/.doom.d/lisp/= or =~/.config/doom/lisp/=
+
+2. Add the following to your Doom Emacs configuration file (usually =config.el=):
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package org-multiline-utils
+     :after org
+     :config
+     (define-key org-mode-map (kbd "C-<return>") #'org-insert-property-continuation)
+     (define-key org-mode-map (kbd "M-q") #'org-property-column-fill))
+   #+END_SRC
+
+3. Restart Doom Emacs or reload your configuration.
+
+*** For Regular Emacs Users
+
+1. Save =org-multiline-utils.el= in a directory on your Emacs load path.
+
+2. Add the following to your Emacs configuration file:
+
+   #+BEGIN_SRC emacs-lisp
+   (require 'org-multiline-utils)
+   (with-eval-after-load 'org
+     (define-key org-mode-map (kbd "C-<return>") #'org-insert-property-continuation)
+     (define-key org-mode-map (kbd "M-q") #'org-property-column-fill))
+   #+END_SRC
+
+3. Restart Emacs or evaluate the configuration.
+
+** Usage
+
+After installation, the following key bindings are available in Org mode:
+
+- =M-q= (=org-property-column-fill=):
+  When the cursor is on a property line or a supported keyword line, wraps the
+  text to =fill-column= width, preserving embedded newlines.
+
+- =C-<return>= (=org-insert-property-continuation=):
+  Inserts a continuation line for the current property or supported keyword.
+
+These functions modify behavior only within property drawers and supported keywords.
+Outside these contexts, they revert to default Org mode behavior.
+
+** Examples
+
+*** Wrapping a Multiline Property
+
+Before:
+#+BEGIN_EXAMPLE
+:LONG_PROPERTY: This is a very long property value that exceeds the fill-column width and contains a newline character.\nThis is the continuation of the property value on a new line.
+#+END_EXAMPLE
+
+After pressing =M-q=:
+#+BEGIN_EXAMPLE
+:LONG_PROPERTY: This is a very long property value that exceeds the
+:LONG_PROPERTY+: fill-column width and contains a newline character.
+:LONG_PROPERTY+: \nThis is the continuation of the property value on a
+:LONG_PROPERTY+: new line.
+#+END_EXAMPLE
+
+*** Wrapping Supported Keywords (#CAPTION example)
+
+Before:
+#+BEGIN_EXAMPLE
+#+CAPTION: Let's wrap this overly long caption text that exceeds the fill-column width significantly, and make it easier to work with.
+#+END_EXAMPLE
+
+After pressing =M-q=:
+#+BEGIN_EXAMPLE
+#+CAPTION: Let's wrap this overly long caption text that exceeds the fill-column
+#+CAPTION: width significantly, and make it easier to work with.
+#+END_EXAMPLE
+
+*** Inserting a Continuation Line
+
+Starting with:
+#+BEGIN_EXAMPLE
+:PROPERTY: Some value
+#+END_EXAMPLE
+
+After pressing =C-<return>=:
+#+BEGIN_EXAMPLE
+:PROPERTY: Some value
+:PROPERTY+:
+#+END_EXAMPLE
+
+** Contributing
+
+Contributions to improve =org-multiline-utils= are welcome. Please submit issues
+or pull requests on the project's GitHub page.
+
+** License
+
+This project is licensed under the GNU General Public License v3.0 or later.

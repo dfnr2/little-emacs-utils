@@ -9,11 +9,23 @@
 
   Supported Org-mode keywords include:
 
-  - #+AUTHOR:
-  - #+CAPTION:
-  - #+HTML_HEAD:
-  - #+LATEX_HEADER:
-  - #+TITLE:
+  - =#+TITLE:=
+  - =#+AUTHOR:=
+  - =#+DATE:=
+  - =#+CAPTION:=
+  - =#+HEADER:=
+  - =#+TBLFM:=
+  - =#+HTML_HEAD:=
+  - =#+LATEX_HEADER:=
+  - =#+ATTR_HTML:=
+  - =#+ATTR_LATEX:=
+  - =#+ATTR_ODT:=
+  - =#+ATTR_ASCII:=
+  - =#+ATTR_ORG:=
+  - =#+ATTR_BEAMER:=
+  - =#+ATTR_REVEAL:=
+  - =#+NAME:=
+  - =#+PLOT:=
 
 ** Functions Provided
 

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 David Fenyes
 ;;
 ;; Author: David Fenyes (dfnum2@gmail.com)
-;; Version: 1.13
+;; Version: 1.14
 ;; Package-Requires: ((emacs "26.1") (org "9.3"))
 ;; Keywords: convenience, hypermedia
 ;; URL: https://github.com/yourusername/org-property-links
@@ -15,6 +15,7 @@
 ;;
 ;; Features:
 ;; - Insert links from property drawers in the current buffer and included files.
+;; - Insert links in full format [[link][description]] or short format [[link]].
 ;; - Uses Org's internal parser for robust #+INCLUDE handling.
 ;; - Handles quoted and unquoted file paths.
 ;; - Reuses parse trees where possible for improved performance.
@@ -23,19 +24,24 @@
 ;; - Customizable sorting options for link insertion.
 ;;
 ;; Usage:
-;; - M-x org-property-links-insert
-;; - M-x org-property-links-create
+;; - M-x org-property-links-insert-long   (insert full format link)
+;; - M-x org-property-links-insert-short  (insert short format link)
+;; - M-x org-property-links-create        (create link property for current heading)
 ;; - M-x org-property-links-toggle-tracking
 ;;
 ;; Example configuration:
 ;; (use-package org-property-links
 ;;   :after org
 ;;   :bind (:map org-mode-map
+;;               ("C-c C-x L" . org-property-links-create)
+;;               ("C-c C-x l l" . org-property-links-insert-long)
+;;               ("C-c C-x l s" . org-property-links-insert-short)
 ;;               ("C-c C-x t" . org-property-links-toggle-tracking))
 ;;   :config
 ;;   (setq org-property-links-sort-mode "description")
 ;;   (setq org-property-links-field "LINK")
 ;;   (setq org-property-links-tracking-field "TRACKING"))
+
 
 ;;; Code:
 
@@ -170,10 +176,9 @@ If LINK-STRING is in the Org link format, its components are extracted."
                 (match-string 2 link-string)))
     (cons link-string link-string)))
 
-(defun org-property-links-insert ()
-  "Insert a link from LINK properties in the current buffer and included files.
-Links are sorted based on `org-property-links-sort-mode`."
-  (interactive)
+(defun org-property-links--insert-impl (short-form)
+  "Implementation function that inserts a link.
+When SHORT-FORM is non-nil, insert link without description."
   (let* ((all-links (org-property-links--collect-all-links))
          (parsed-links (mapcar #'org-property-links--parse-link all-links)))
     (if (null parsed-links)
@@ -200,9 +205,23 @@ Links are sorted based on `org-property-links-sort-mode`."
                                              nil t)))
         (when selected-link
           (let ((original-link (cdr (assoc selected-link padded-links))))
-            (insert (format "[[%s][%s]]"
-                            (car original-link)
-                            (cdr original-link)))))))))
+            (if short-form
+                ;; Short form: link without description
+                (insert (format "[[%s]]" (car original-link)))
+              ;; Long form: full Org link with brackets and description
+              (insert (format "[[%s][%s]]"
+                              (car original-link)
+                              (cdr original-link))))))))))
+
+(defun org-property-links-insert-long ()
+  "Insert a link from LINK properties in full Org format with description."
+  (interactive)
+  (org-property-links--insert-impl nil))
+
+(defun org-property-links-insert-short ()
+  "Insert just the target part of a link from LINK properties."
+  (interactive)
+  (org-property-links--insert-impl t))
 
 
 ;;; Link Property Creation

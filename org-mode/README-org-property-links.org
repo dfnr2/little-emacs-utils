@@ -15,6 +15,8 @@ Org Property Links is an Emacs package that provides convenient functions to
 - Create new =:LINK:= properties based on the current Org element
 - Customizable sorting options for link insertion
 - Flexible link target selection (NAME, target definition, CUSTOM_ID, or heading)
+- Insert long-form links (link and description), rendered as a clickable
+  description, or short form links (link only), rendered as a section number.
 
 * Installation
 
@@ -32,20 +34,32 @@ Org Property Links is an Emacs package that provides convenient functions to
 
 #+BEGIN_SRC emacs-lisp
 (use-package org-property-links
-  :load-path "/path/to/org-property-links-directory"
   :after org
+  :load-path "~/.config/doom/lisp"
+  :bind (:map org-mode-map
+              ("C-c C-x l l" . org-property-links-insert-long)
+              ("C-c C-x l s" . org-property-links-insert-short)
+              ("C-c C-x t" . org-property-links-toggle-tracking)
+              ("C-c C-x L" . org-property-links-create))
   :config
-  (setq org-property-links-sort-mode "description") ; Optional: set default sort mode
-  (setq org-property-links-field "LINK")) ; Optional: set custom property name
+  (setq org-property-links-sort-mode "description")
+  (setq org-property-links-field "LINK")
+  (setq org-property-links-tracking-field "TRACKING"))
 #+END_SRC
 
 * Usage
 
 ** Inserting Links
 
-Use =M-x org-property-links-insert= to insert a link from existing link
-properties in the current buffer. Links will be presented according to the
-=org-property-links-sort-mode= setting.
+Use C-c C-x l l (recommending binding) or =M-x org-property-links-insert-long=
+to insert a link from existing link properties in the current buffer, with both
+link target and description.
+
+Use C-c C-x l s (recommending binding) or =M-x org-property-links-insert-short=
+to insert a link from existing link properties in the current buffer, with both
+link target and description.
+
+Links will be presented according to the =org-property-links-sort-mode= setting.
 
 ** Creating Links
 

@@ -16,7 +16,8 @@ Org Property Links is an Emacs package that provides convenient functions to
 - Customizable sorting options for link insertion
 - Flexible link target selection (NAME, target definition, CUSTOM_ID, or heading)
 - Insert long-form links (link and description), rendered as a clickable
-  description, or short form links (link only), rendered as a section number.
+  description, short form links (link only), rendered as a section number,
+  or verbose links with a customizable format.
 
 * Installation
 
@@ -39,25 +40,31 @@ Org Property Links is an Emacs package that provides convenient functions to
   :bind (:map org-mode-map
               ("C-c C-x l l" . org-property-links-insert-long)
               ("C-c C-x l s" . org-property-links-insert-short)
+              ("C-c C-x l v" . org-property-links-insert-verbose)
               ("C-c C-x t" . org-property-links-toggle-tracking)
               ("C-c C-x L" . org-property-links-create))
   :config
   (setq org-property-links-sort-mode "description")
   (setq org-property-links-field "LINK")
-  (setq org-property-links-tracking-field "TRACKING"))
+  (setq org-property-links-tracking-field "TRACKING")
+  ;; Verbose format: %s = link target, %d = description
+  (setq org-property-links-verbose-format "[[%s][%d]] (Sec. [[%s]])"))
 #+END_SRC
 
 * Usage
 
 ** Inserting Links
 
-Use C-c C-x l l (recommending binding) or =M-x org-property-links-insert-long=
-to insert a link from existing link properties in the current buffer, with both
-link target and description.
+Use =C-c C-x l l= (recommended binding) or =M-x org-property-links-insert-long=
+to insert a link with both link target and description: =[[link][description]]=.
 
-Use C-c C-x l s (recommending binding) or =M-x org-property-links-insert-short=
-to insert a link from existing link properties in the current buffer, with both
-link target and description.
+Use =C-c C-x l s= (recommended binding) or =M-x org-property-links-insert-short=
+to insert a link with only the target: =[[link]]=. This renders as a section number.
+
+Use =C-c C-x l v= (recommended binding) or =M-x org-property-links-insert-verbose=
+to insert a link using the customizable verbose format. The default format is
+=[[link][description]] (Sec. [[link]])=, which shows both the description and
+section number. Customize via =org-property-links-verbose-format=.
 
 Links will be presented according to the =org-property-links-sort-mode= setting.
 
@@ -97,7 +104,25 @@ Or as a file-local variable:
 The name of the property used to store links. Default is ="LINK"=. You can change it globally:
 
 #+BEGIN_SRC emacs-lisp
-(setq org-property-links-property-name "MY_LINK")
+(setq org-property-links-field "MY_LINK")
+#+END_SRC
+
+** org-property-links-verbose-format
+
+The format string for verbose link insertion. Use =%s= for link target and =%d=
+for description. Default is ="[[%s][%d]] (Sec. [[%s]])"=.
+
+Examples:
+
+#+BEGIN_SRC emacs-lisp
+;; Default: description link followed by section reference
+(setq org-property-links-verbose-format "[[%s][%d]] (Sec. [[%s]])")
+
+;; Description with parenthetical section reference
+(setq org-property-links-verbose-format "%d (see Sec. [[%s]])")
+
+;; Just description with link in parentheses
+(setq org-property-links-verbose-format "%d ([[%s]])")
 #+END_SRC
 
 * How It Works

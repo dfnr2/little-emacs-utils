@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 David Fenyes
 ;;
 ;; Author: David Fenyes (dfnum2@gmail.com)
-;; Version: 1.14
+;; Version: 1.15
 ;; Package-Requires: ((emacs "26.1") (org "9.3"))
 ;; Keywords: convenience, hypermedia
 ;; URL: https://github.com/yourusername/org-property-links
@@ -15,7 +15,8 @@
 ;;
 ;; Features:
 ;; - Insert links from property drawers in the current buffer and included files.
-;; - Insert links in full format [[link][description]] or short format [[link]].
+;; - Insert links in full format [[link][description]], short format [[link]],
+;;   or verbose format (customizable via `org-property-links-verbose-format').
 ;; - Uses Org's internal parser for robust #+INCLUDE handling.
 ;; - Handles quoted and unquoted file paths.
 ;; - Reuses parse trees where possible for improved performance.
@@ -24,9 +25,10 @@
 ;; - Customizable sorting options for link insertion.
 ;;
 ;; Usage:
-;; - M-x org-property-links-insert-long   (insert full format link)
-;; - M-x org-property-links-insert-short  (insert short format link)
-;; - M-x org-property-links-create        (create link property for current heading)
+;; - M-x org-property-links-insert-long    (insert full format link)
+;; - M-x org-property-links-insert-short   (insert short format link)
+;; - M-x org-property-links-insert-verbose (insert using verbose format)
+;; - M-x org-property-links-create         (create link property for current heading)
 ;; - M-x org-property-links-toggle-tracking
 ;;
 ;; Example configuration:
@@ -36,11 +38,14 @@
 ;;               ("C-c C-x L" . org-property-links-create)
 ;;               ("C-c C-x l l" . org-property-links-insert-long)
 ;;               ("C-c C-x l s" . org-property-links-insert-short)
+;;               ("C-c C-x l v" . org-property-links-insert-verbose)
 ;;               ("C-c C-x t" . org-property-links-toggle-tracking))
 ;;   :config
 ;;   (setq org-property-links-sort-mode "description")
 ;;   (setq org-property-links-field "LINK")
-;;   (setq org-property-links-tracking-field "TRACKING"))
+;;   (setq org-property-links-tracking-field "TRACKING")
+;;   ;; Verbose format: %s = link target, %d = description
+;;   (setq org-property-links-verbose-format "[[%s][%d]] (Sec. [[%s]])"))
 
 
 ;;; Code:
@@ -67,6 +72,12 @@ Possible values are \"description\" or \"link\"."
 
 (defcustom org-property-links-tracking-field "TRACKING"
   "The name of the property used to track items."
+  :type 'string
+  :group 'org-property-links)
+
+(defcustom org-property-links-verbose-format "[[%s][%d]] (Sec. [[%s]])"
+  "Format string for verbose link insertion.
+Use %d for description and %s for link target."
   :type 'string
   :group 'org-property-links)
 
@@ -176,9 +187,21 @@ If LINK-STRING is in the Org link format, its components are extracted."
                 (match-string 2 link-string)))
     (cons link-string link-string)))
 
-(defun org-property-links--insert-impl (short-form)
+(defun org-property-links--format-verbose (link-target link-desc)
+  "Format a verbose link using `org-property-links-verbose-format'.
+LINK-TARGET is the link path, LINK-DESC is the description.
+In the format string, %s is replaced with link target and %d with description."
+  (let ((result org-property-links-verbose-format))
+    (setq result (replace-regexp-in-string "%d" link-desc result t t))
+    (setq result (replace-regexp-in-string "%s" link-target result t t))
+    result))
+
+(defun org-property-links--insert-impl (style)
   "Implementation function that inserts a link.
-When SHORT-FORM is non-nil, insert link without description."
+STYLE should be one of: `long', `short', or `verbose'.
+- long: insert [[link][description]]
+- short: insert [[link]]
+- verbose: insert using `org-property-links-verbose-format'"
   (let* ((all-links (org-property-links--collect-all-links))
          (parsed-links (mapcar #'org-property-links--parse-link all-links)))
     (if (null parsed-links)
@@ -204,24 +227,32 @@ When SHORT-FORM is non-nil, insert link without description."
                                              (mapcar #'car padded-links)
                                              nil t)))
         (when selected-link
-          (let ((original-link (cdr (assoc selected-link padded-links))))
-            (if short-form
-                ;; Short form: link without description
-                (insert (format "[[%s]]" (car original-link)))
-              ;; Long form: full Org link with brackets and description
-              (insert (format "[[%s][%s]]"
-                              (car original-link)
-                              (cdr original-link))))))))))
+          (let* ((original-link (cdr (assoc selected-link padded-links)))
+                 (link-target (car original-link))
+                 (link-desc (cdr original-link)))
+            (pcase style
+              ('short
+               (insert (format "[[%s]]" link-target)))
+              ('verbose
+               (insert (org-property-links--format-verbose link-target link-desc)))
+              (_  ; default to long
+               (insert (format "[[%s][%s]]" link-target link-desc))))))))))
 
 (defun org-property-links-insert-long ()
   "Insert a link from LINK properties in full Org format with description."
   (interactive)
-  (org-property-links--insert-impl nil))
+  (org-property-links--insert-impl 'long))
 
 (defun org-property-links-insert-short ()
   "Insert just the target part of a link from LINK properties."
   (interactive)
-  (org-property-links--insert-impl t))
+  (org-property-links--insert-impl 'short))
+
+(defun org-property-links-insert-verbose ()
+  "Insert a link using the customizable verbose format.
+The format is controlled by `org-property-links-verbose-format'."
+  (interactive)
+  (org-property-links--insert-impl 'verbose))
 
 
 ;;; Link Property Creation
